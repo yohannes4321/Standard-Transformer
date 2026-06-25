@@ -35,9 +35,9 @@ def build_tokenizer():
 
     start_time = time.perf_counter()
 
-    # Train tokenizer on train + validation + test data
+    # Train tokenizer only on training data (avoid data leakage)
     tokenizer.train(
-        files=[str(train_path), str(valid_path), str(test_path)],
+        files=[str(train_path)],
         trainer=trainer
     )
 
