@@ -39,17 +39,19 @@ def get_datasets(train_stride: int = 1, eval_stride: int = None):
 
 def get_loaders(
     distributed: bool = False,
-    stride: int = 1
+    stride: int = None
 ):
     """
     Wrap datasets into PyTorch DataLoaders with batching and shuffling.
 
     stride=1:
-        fully overlapping sliding windows
+        fully overlapping sliding windows (max data)
 
     stride=max_len:
-        non-overlapping chunks
+        non-overlapping chunks (default)
     """
+    if stride is None:
+        stride = max_len
 
     train_dataset, valid_dataset, test_dataset = get_datasets(
         train_stride=stride, eval_stride=max_len
