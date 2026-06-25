@@ -8,28 +8,30 @@ from data_preparation.config import encoded_dir, max_len, batch_size
 from data_preparation.dataset import EncodedDataset
 
 
-def get_datasets(stride: int = max_len):
+def get_datasets(train_stride: int = 1, eval_stride: int = None):
     """
     Load train, validation, and test datasets from encoded token ID files
     using sliding-window sequences.
     """
+    if eval_stride is None:
+        eval_stride = max_len
 
     train_dataset = EncodedDataset(
         encoded_dir / "train.pt",
         max_len,
-        stride=stride
+        stride=train_stride
     )
 
     valid_dataset = EncodedDataset(
         encoded_dir / "valid.pt",
         max_len,
-        stride=stride
+        stride=eval_stride
     )
 
     test_dataset = EncodedDataset(
         encoded_dir / "test.pt",
         max_len,
-        stride=stride
+        stride=eval_stride
     )
 
     return train_dataset, valid_dataset, test_dataset
@@ -37,20 +39,22 @@ def get_datasets(stride: int = max_len):
 
 def get_loaders(
     distributed: bool = False,
-    stride: int = 1
+    stride: int = None
 ):
     """
     Wrap datasets into PyTorch DataLoaders with batching and shuffling.
 
     stride=1:
-        fully overlapping sliding windows
+        fully overlapping sliding windows (max data)
 
-    stride=max_len+1:
-        non-overlapping chunks
+    stride=max_len:
+        non-overlapping chunks (default)
     """
+    if stride is None:
+        stride = max_len
 
     train_dataset, valid_dataset, test_dataset = get_datasets(
-        stride=stride
+        train_stride=stride, eval_stride=max_len
     )
 
 
