@@ -76,10 +76,7 @@ class LanguageModel(nn.Module):
         self.drop = nn.Dropout(config.dropout)
         self.blocks = nn.Sequential(*[Block(config) for _ in range(config.n_layer)])
         self.ln_f = nn.LayerNorm(config.n_embd)
-        self.lm_head = nn.Linear(config.n_embd, config.vocab_size, bias=False)
-
-        # Weight tying: share token embedding weights with the output projection
-        self.lm_head.weight = self.token_embedding_table.weight
+        self.lm_head = nn.Linear(config.n_embd, config.vocab_size)
 
     def forward(self, idx, targets=None):
         B, T = idx.shape
@@ -95,7 +92,7 @@ class LanguageModel(nn.Module):
             B, T, C = logits.shape
             logits_flat = logits.view(B*T, C)
             targets_flat = targets.view(B*T)
-            loss = F.cross_entropy(logits_flat, targets_flat, label_smoothing=config.label_smoothing)
+            loss = F.cross_entropy(logits_flat, targets_flat, label_smoothing=self.config.label_smoothing)
         return logits, loss
     
     @torch.no_grad()
